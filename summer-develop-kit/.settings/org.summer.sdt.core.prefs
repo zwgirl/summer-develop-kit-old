@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+org.summer.sdt.core.compiler.codegen.inlineJsrBytecode=disabled
+org.summer.sdt.core.compiler.codegen.methodParameters=do not generate
+org.summer.sdt.core.compiler.codegen.targetPlatform=1.8
+org.summer.sdt.core.compiler.codegen.unusedLocal=preserve
+org.summer.sdt.core.compiler.compliance=1.8
+org.summer.sdt.core.compiler.debug.lineNumber=generate
+org.summer.sdt.core.compiler.debug.localVariable=generate
+org.summer.sdt.core.compiler.debug.sourceFile=generate
+org.summer.sdt.core.compiler.problem.assertIdentifier=error
+org.summer.sdt.core.compiler.problem.enumIdentifier=error
+org.summer.sdt.core.compiler.source=1.8
