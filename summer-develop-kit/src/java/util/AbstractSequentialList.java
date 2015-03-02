@@ -85,9 +85,9 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      */
     public E get(int index) {
         try {
-            return listIterator(index).next();
+            return listIteratorAt(index).next();
         } catch (NoSuchElementException exc) {
-            throw new IndexOutOfBoundsException("Index: "+index);
+            throw new Error(0, "index out of bound !");
         }
     }
 
@@ -112,12 +112,12 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      */
     public E set(int index, E element) {
         try {
-            ListIterator<E> e = listIterator(index);
+            ListIterator<E> e = listIteratorAt(index);
             E oldVal = e.next();
             e.set(element);
             return oldVal;
         } catch (NoSuchElementException exc) {
-            throw new IndexOutOfBoundsException("Index: "+index);
+            throw new Error(0, "index out of bound !");
         }
     }
 
@@ -141,11 +141,11 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public void add(int index, E element) {
+    public void addAt(int index, E element) {
         try {
-            listIterator(index).add(element);
+            listIteratorAt(index).add(element);
         } catch (NoSuchElementException exc) {
-            throw new IndexOutOfBoundsException("Index: "+index);
+            throw new Error(0, "index out of bound !");
         }
     }
 
@@ -166,14 +166,14 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      * @throws UnsupportedOperationException {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public E remove(int index) {
+    public E removeAt(int index) {
         try {
-            ListIterator<E> e = listIterator(index);
+            ListIterator<E> e = listIteratorAt(index);
             E outCast = e.next();
             e.remove();
             return outCast;
         } catch (NoSuchElementException exc) {
-            throw new IndexOutOfBoundsException("Index: "+index);
+            throw new Error(0, "index out of bound !");
         }
     }
 
@@ -209,10 +209,10 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public boolean addAll(int index, Collection<? extends E> c) {
+    public boolean addAllAt(int index, Collection<? extends E> c) {
         try {
             boolean modified = false;
-            ListIterator<E> e1 = listIterator(index);
+            ListIterator<E> e1 = listIteratorAt(index);
             Iterator<? extends E> e2 = c.iterator();
             while (e2.hasNext()) {
                 e1.add(e2.next());
@@ -220,7 +220,7 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
             }
             return modified;
         } catch (NoSuchElementException exc) {
-            throw new IndexOutOfBoundsException("Index: "+index);
+            throw new Error(0, "index out of bound !");
         }
     }
 
@@ -249,5 +249,5 @@ public abstract class AbstractSequentialList<E> extends AbstractList<E> {
      *         sequence)
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public abstract ListIterator<E> listIterator(int index);
+    public abstract ListIterator<E> listIteratorAt(int index);
 }

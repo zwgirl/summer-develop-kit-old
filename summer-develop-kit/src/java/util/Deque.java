@@ -439,7 +439,7 @@ public interface Deque<E> extends Queue<E> {
      * @return the head of the queue represented by this deque
      * @throws NoSuchElementException if this deque is empty
      */
-    E remove();
+    E removeHead();
 
     /**
      * Retrieves and removes the head of the queue represented by this deque

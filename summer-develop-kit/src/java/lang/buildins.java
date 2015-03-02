@@ -4,8 +4,8 @@ package java.lang;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.functions.Consumer;
 
+import org.w3c.dom.Node;
 import org.w3c.html.HTMLElement;
  
 public final class Class<T> /*implements java.io.Serializable*/ {
@@ -106,6 +106,12 @@ public final class Class<T> /*implements java.io.Serializable*/ {
 
     	return false;
  	}
+	
+	public Object factory {
+		&{
+			return this._constructor;
+		}
+	}
   
 	// This property will return all of the interfaces implemented by a class 
 	public Class<?>[] interfaces{
@@ -376,7 +382,7 @@ public native class Array<T> {
 	
 	public native boolean some(ArrayCallback<T> callbackfn, Object thisContext);
 	
-	public native Array<T> sort(SortFunction<T> sortFunction);
+	public native Array<T> sort(Comparator<T> sortFunction);
 	
 	public native Array<T> splice(int start, int deleteCount);
 	
@@ -391,7 +397,46 @@ public function void ArrayCallback<T>(T value, int index, Array<T> array);
 
 public function void ReduceCallback<T>(T previousValue, T currentValue, int currentIndex, Array<T> array);
 
-public function int SortFunction<T>(T first, T second);
+/**
+ * Compares this object with the specified object for order.  Returns a
+ * negative integer, zero, or a positive integer as this object is less
+ * than, equal to, or greater than the specified object.
+ *
+ * <p>The implementor must ensure <tt>sgn(x.compareTo(y)) ==
+ * -sgn(y.compareTo(x))</tt> for all <tt>x</tt> and <tt>y</tt>.  (This
+ * implies that <tt>x.compareTo(y)</tt> must throw an exception iff
+ * <tt>y.compareTo(x)</tt> throws an exception.)
+ *
+ * <p>The implementor must also ensure that the relation is transitive:
+ * <tt>(x.compareTo(y)&gt;0 &amp;&amp; y.compareTo(z)&gt;0)</tt> implies
+ * <tt>x.compareTo(z)&gt;0</tt>.
+ *
+ * <p>Finally, the implementor must ensure that <tt>x.compareTo(y)==0</tt>
+ * implies that <tt>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</tt>, for
+ * all <tt>z</tt>.
+ *
+ * <p>It is strongly recommended, but <i>not</i> strictly required that
+ * <tt>(x.compareTo(y)==0) == (x.equals(y))</tt>.  Generally speaking, any
+ * class that implements the <tt>Comparable</tt> interface and violates
+ * this condition should clearly indicate this fact.  The recommended
+ * language is "Note: this class has a natural ordering that is
+ * inconsistent with equals."
+ *
+ * <p>In the foregoing description, the notation
+ * <tt>sgn(</tt><i>expression</i><tt>)</tt> designates the mathematical
+ * <i>signum</i> function, which is defined to return one of <tt>-1</tt>,
+ * <tt>0</tt>, or <tt>1</tt> according to whether the value of
+ * <i>expression</i> is negative, zero or positive.
+ *
+ * @param   o the object to be compared.
+ * @return  a negative integer, zero, or a positive integer as this object
+ *          is less than, equal to, or greater than the specified object.
+ *
+ * @throws NullPointerException if the specified object is null
+ * @throws ClassCastException if the specified object's type prevents it
+ *         from being compared to this object.
+ */
+public function int Comparator<T>(T o1, T o2);
   
 public native class Boolean { 
 	public native Boolean valueOf();
@@ -500,16 +545,17 @@ public final native class Math {
 
 	public static native double log(double number);
 
-	public static native double max(double... number);  
-	public static native float max(float... number);
-	public static native int max(int... number);
-	public static native long max(long... number);
-	
+//	public static native double max(double... number);  
+//	public static native float max(float... number);
+//	public static native int max(int... number);
+//	public static native long max(long... number); 
+	public static native Number max(Number... number); 
 
-	public static native double min(double... number);
-	public static native float min(float... number); 
-	public static native int min(int... number);
-	public static native long min(long... number); 
+//	public static native double min(double... number);
+//	public static native float min(float... number); 
+//	public static native int min(int... number);
+//	public static native long min(long... number); 
+	public static native long Number(long... number); 
 
 	public static native double pow(double base, double exponent);
 
@@ -1122,12 +1168,30 @@ public function void SetCallback<T>(T value, int index, Array<T> array1);
  * 
  */
 public abstract class Template {
-	public final void create(HTMLElement parent){
-		doCreate(parent);
+	public final Node create(Node parent){
+		return doCreate(parent);
 	}
 	
-	protected void doCreate(HTMLElement parent){
-		
+	protected Node doCreate(Node parent){
+		throw new Error(0, "illegal call!");
+	}
+}
+
+public abstract class ItemTemplate {
+	public final Node create(Node parent, Object item){
+		Node root = createRoot(parent);
+		root.dataContext = new DataContext(item);
+		parent.appendChild(root);
+		createChild(root);
+		return root;
+	}
+	
+	public Node createChild(Node parent){
+		throw new Error(0, "illegal call!");
+	}
+	
+	public Node createRoot(Node parent){
+		throw new Error(0, "illegal call!");
 	}
 }
 
@@ -1142,7 +1206,7 @@ public abstract class Component {
 	}
 	
 	protected void doCreate(HTMLElement parent){
-		
+		throw new Error(0, "illegal call!");
 	}
 }
 
@@ -1186,7 +1250,13 @@ public interface Iterable<T> {
     default void forEach(Consumer<? super T> action) {
         Objects.requireNonNull(action);
         for (T t : this) {
-            action.accept(t);
+            action(t);
         }
     }
 }
+
+public function R Operator<T, R> (T t);
+
+public function T UnaryOperator<T> (T t);
+
+public function void Consumer<T>(T t);

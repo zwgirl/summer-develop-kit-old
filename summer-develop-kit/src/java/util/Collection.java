@@ -25,10 +25,6 @@
 
 package java.util;
 
-import java.util.functions.Predicate;
-//import java.util.stream.Stream;
-//import java.util.stream.StreamSupport;
-
 /**
  * The root interface in the <i>collection hierarchy</i>.  A collection
  * represents a group of objects, known as its <i>elements</i>.  Some
@@ -197,7 +193,7 @@ public interface Collection<E> extends Iterable<E> {
      *
      * @return an array containing all of the elements in this collection
      */
-    Object[] toArray();
+    E[] toArray();
 
     // Modification Operations
 
@@ -353,12 +349,12 @@ public interface Collection<E> extends Iterable<E> {
      *         {@link #iterator}
      * @since 1.8
      */
-    default boolean removeIf(Predicate<? super E> filter) {
+    default boolean removeIf(Operator<? super E, Boolean> filter) {
         Objects.requireNonNull(filter);
         boolean removed = false;
         final Iterator<E> each = iterator();
         while (each.hasNext()) {
-            if (filter.test(each.next())) {
+            if ((boolean) filter(each.next())) {
                 each.remove();
                 removed = true;
             }

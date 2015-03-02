@@ -62,10 +62,10 @@ package java.lang.annotation;
  *
  * @since 1.5
  * @jls 9.6.3.1 @Target
- */
+ */ 
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.RUNTIME) 
 @Target(ElementType.ANNOTATION_TYPE)
-public @interface Target {
-    ElementType[] value();
+public @interface Target { 
+    ElementType[] value(); 
 }

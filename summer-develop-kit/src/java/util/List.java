@@ -25,8 +25,6 @@
 
 package java.util; 
 
-import java.util.functions.UnaryOperator; 
-
 /**
  * An ordered collection (also known as a <i>sequence</i>).  The user of this
  * interface has precise control over where in the list each element is
@@ -167,7 +165,7 @@ public interface List<E> extends Collection<E> {
      *         sequence
      * @see Arrays#asList(Object[])
      */
-    Object[] toArray();
+    E[] toArray();
 
     // Modification Operations
 
@@ -193,7 +191,6 @@ public interface List<E> extends Collection<E> {
      * @throws IllegalArgumentException if some property of this element
      *         prevents it from being added to this list
      */
-    @Overload("111")
     boolean add(E e);
 
     /**
@@ -292,8 +289,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt; size()</tt>)
      */
-    @Overload("1")
-    boolean addAll(int index, Collection<? extends E> c);
+    boolean addAllAt(int index, Collection<? extends E> c);
 
     /**
      * Removes from this list all of its elements that are contained in the
@@ -363,11 +359,10 @@ public interface List<E> extends Collection<E> {
      *         (<a href="Collection.html#optional-restrictions">optional</a>)
      * @since 1.8
      */
-    default void replaceAll(UnaryOperator<E> operator) {
-        Objects.requireNonNull(operator);
+    default void replaceAll(Operator<? super E, E> operator) {
         final ListIterator<E> li = this.listIterator();
         while (li.hasNext()) {
-            li.set(operator.apply(li.next()));
+            li.set(operator(li.next()));
         }
     }
 
@@ -494,8 +489,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt; size()</tt>)
      */
-    @Overload("1")
-    void add(int index, E element);
+    void addAt(int index, E element);
 
     /**
      * Removes the element at the specified position in this list (optional
@@ -510,7 +504,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    E remove(int index);
+    E removeAt(int index);
 
 
     // Search Operations
@@ -580,8 +574,7 @@ public interface List<E> extends Collection<E> {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
      */
-    @Overload("1")
-    ListIterator<E> listIterator(int index);
+    ListIterator<E> listIteratorAt(int index);
 
     // View
 

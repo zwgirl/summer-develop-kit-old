@@ -106,7 +106,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      *         prevents it from being added to this list
      */
     public boolean add(E e) {
-        add(size(), e);
+        addAt(size(), e);
         return true;
     }
     
@@ -122,7 +122,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws IllegalArgumentException      {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public void add(int index, E element) {
+    public void addAt(int index, E element) {
         throw new UnsupportedOperationException();
     }
     /**
@@ -157,7 +157,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws UnsupportedOperationException {@inheritDoc}
      * @throws IndexOutOfBoundsException     {@inheritDoc}
      */
-    public E remove(int index) {
+    public E removeAt(int index) {
         throw new UnsupportedOperationException();
     }
 
@@ -200,7 +200,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws NullPointerException {@inheritDoc}
      */
     public int lastIndexOf(Object o) {
-        ListIterator<E> it = listIterator(size());
+        ListIterator<E> it = listIteratorAt(size());
         if (o==null) {
             while (it.hasPrevious())
                 if (it.previous()==null)
@@ -257,7 +257,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         rangeCheckForAdd(index);
         boolean modified = false;
         for (E e : c) {
-            add(index++, e);
+            addAt(index++, e);
             modified = true;
         }
         return modified;
@@ -296,7 +296,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @see #listIterator(int)
      */
     public ListIterator<E> listIterator() {
-        return listIterator(0);
+        return listIteratorAt(0);
     }
 
     /**
@@ -321,7 +321,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      *
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
-    public ListIterator<E> listIterator(final int index) {
+    public ListIterator<E> listIteratorAt(final int index) {
         rangeCheckForAdd(index);
 
         return new ListItr(index);
@@ -403,7 +403,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
                 E previous = get(i);
                 lastRet = cursor = i;
                 return previous;
-            } catch (IndexOutOfBoundsException e) {
+            } catch (Error e) {
 //                checkForComodification();
                 throw new NoSuchElementException();
             }
@@ -435,7 +435,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 //            try {
                 int i = cursor;
-                AbstractList.this.add(i, e);
+                AbstractList.this.addAt(i, e);
                 lastRet = -1;
                 cursor = i + 1;
                 expectedModCount = modCount;
@@ -565,7 +565,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @param toIndex index after last element to be removed
      */
     protected void removeRange(int fromIndex, int toIndex) {
-        ListIterator<E> it = listIterator(fromIndex);
+        ListIterator<E> it = listIteratorAt(fromIndex);
         for (int i=0, n=toIndex-fromIndex; i<n; i++) {
             it.next();
             it.remove();
@@ -602,7 +602,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
     private void rangeCheckForAdd(int index) {
         if (index < 0 || index > size())
-            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+            throw new Error(0, "Index out of boundsException" + outOfBoundsMsg(index));
     }
 
     private String outOfBoundsMsg(int index) {
@@ -617,9 +617,9 @@ class SubList<E> extends AbstractList<E> {
 
     SubList(AbstractList<E> list, int fromIndex, int toIndex) {
         if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+        	throw new Error(0, "from index out of boundsException! ");
         if (toIndex > list.size())
-            throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+        	throw new Error(0, "toIndex out of boundsException! ");
         if (fromIndex > toIndex)
             throw new IllegalArgumentException("fromIndex(" + fromIndex +
                                                ") > toIndex(" + toIndex + ")");
@@ -646,18 +646,18 @@ class SubList<E> extends AbstractList<E> {
         return size;
     }
 
-    public void add(int index, E element) {
+    public void addAt(int index, E element) {
 //        rangeCheckForAdd(index);
 //        checkForComodification();
-        l.add(index+offset, element);
+        l.addAt(index+offset, element);
         this.modCount = l.modCount;
         size++;
     }
 
-    public E remove(int index) {
+    public E removeAt(int index) {
 //        rangeCheck(index);
 //        checkForComodification();
-        E result = l.remove(index+offset);
+        E result = l.removeAt(index+offset);
         this.modCount = l.modCount;
         size--;
         return result;
@@ -674,7 +674,7 @@ class SubList<E> extends AbstractList<E> {
         return addAll(size, c);
     }
 
-    public boolean addAll(int index, Collection<? extends E> c) {
+    public boolean addAllAt(int index, Collection<? extends E> c) {
 //        rangeCheckForAdd(index);
         int cSize = c.size();
         if (cSize==0)
@@ -696,7 +696,7 @@ class SubList<E> extends AbstractList<E> {
 //        rangeCheckForAdd(index);
 
         return new ListIterator<E>() {
-            private final ListIterator<E> i = l.listIterator(index+offset);
+            private final ListIterator<E> i = l.listIteratorAt(index+offset);
 
             public boolean hasNext() {
                 return nextIndex() < size;

@@ -211,6 +211,11 @@ public native interface Global {
 	  public native long setInterval(String handler, long timeout, Object... arguments);
 
 	  public native void clearInterval(long handle);
+	  
+	  //storage
+//	  readonly attribute 
+	  public native Storage sessionStorage{}
+	  public native Storage localStorage{}
 }
 
 ////[NoInterfaceObject]
@@ -683,3 +688,17 @@ public native interface Navigator extends NavigatorID, NavigatorLanguage, Naviga
 		public native void append(String name, Blob value, String filename);
 		public native void append(String name, String value);
 	}
+	
+	interface Storage {
+//		readonly attribute unsigned 
+		public native long length{}
+		public native String key(/*unsigned */long index);
+		/*getter*/ 
+		public native String getItem(String key);
+//		setter creator 
+		public native void setItem(String key, String value);
+//		deleter 
+		public native void removeItem(String key);
+		public native void clear();
+	}
+	

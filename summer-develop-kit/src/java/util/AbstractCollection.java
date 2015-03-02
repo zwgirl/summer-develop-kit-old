@@ -131,16 +131,15 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      * return list.toArray();
      * }</pre>
      */
-    public Object[] toArray() {
+    public E[] toArray() {
         // Estimate size of array; be prepared to see more or fewer elements
-        Object[] r = new Array<Object>(10); 
+        Object[] r = new Array<Object>(); 
         Iterator<E> it = iterator();
         int i = size();
         while (it.hasNext()) {  
             r[i++] = it.next();
         }
-        // trim if overallocated
-        return (r.length <= size()) ? r : r.slice(0, size());
+        return (Array<E>) r; //(r.length <= size()) ? r : r.slice(0, size());
     }
 
     /**

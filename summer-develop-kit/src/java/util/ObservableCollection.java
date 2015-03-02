@@ -8,7 +8,7 @@ import org.w3c.dom.Node;
 // Implementation of a dynamic data collection based on generic Collection&lt;T&gt;, 
 /// implementing INotifyCollectionChanged to notify listeners
 // when items get added, removed or the whole list is refreshed.
-public class ObservableCollection<T> extends Collection<T> implements INotifyCollectionChanged, INotifyPropertyChanged 
+public class ObservableCollection<T> implements Collection<T> ,INotifyCollectionChanged, INotifyPropertyChanged 
 { 
     // <summary> 
     // Initializes a new instance of ObservableCollection that is empty and has default initial capacity. 
@@ -23,7 +23,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
     // <exception cref="ArgumentNullException"> list is a null reference </exception>
     public ObservableCollection(List<T> list)        
     {
-    	super((list != null) ? new List<T>(list.Count) : list);
+//    	super((list != null) ? new List<T>(list.Count) : list);
         // Workaround for VSWhidbey bug 562681 (tracked by Windows bug 1369339). 
         // We should be able to simply call the base(list) ctor.  But Collection<T> 
         // doesn't copy the list (contrary to the documentation) - it uses the
@@ -42,7 +42,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
     public ObservableCollection(Iterable<T> collection) 
     {
         if (collection == null) 
-            throw new ArgumentNullException("collection");
+            throw new Error(0, "collection may not be null!");
 
         CopyFrom(collection);
     } 
@@ -52,11 +52,11 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
         List<T> items = Items;
         if (collection != null && items != null) 
         {
-            using (IEnumerator<T> enumerator = collection.GetEnumerator())
+            Iterator<T> enumerator = collection.iterator();
             {
-                while (enumerator.MoveNext()) 
+                while (enumerator.hasNext()) 
                 {
-                    items.Add(enumerator.Current); 
+                    items.add(enumerator.next()); 
                 } 
             }
         } 
@@ -90,7 +90,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
     // Called by base class Collection&lt;T&gt; when the list is being cleared;
     // raises a CollectionChanged event to any listeners. 
-    protected void ClearItems() 
+    protected void clearItems() 
     { 
         super.ClearItems(); 
         OnPropertyChanged(CountString);
@@ -100,7 +100,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
     // Called by base class Collection&lt;T&gt; when an item is removed from list; 
     // raises a CollectionChanged event to any listeners.
-    protected void RemoveItem(int index)
+    protected void removeItem(int index)
     {
         T removedItem  = this[index]; 
 
@@ -113,7 +113,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
     // Called by base class Collection&lt;T&gt; when an item is added to list;
     // raises a CollectionChanged event to any listeners. 
-    protected void InsertItem(int index, T item)
+    protected void insertItem(int index, T item)
     { 
         super.InsertItem(index, item);
 
@@ -124,7 +124,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
     // Called by base class Collection&lt;T&gt; when an item is set in list;
     // raises a CollectionChanged event to any listeners.
-    protected void SetItem(int index, T item) 
+    protected void setItem(int index, T item) 
     {
         T originalItem = this[index]; 
         super.SetItem(index, item);
@@ -135,7 +135,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
     // Called by base class ObservableCollection&lt;T&gt; when an item is to be moved within the list; 
     // raises a CollectionChanged event to any listeners. 
-    protected void MoveItem(int oldIndex, int newIndex) 
+    protected void moveItem(int oldIndex, int newIndex) 
     {
         T removedItem = this[oldIndex]; 
 
@@ -148,7 +148,7 @@ public class ObservableCollection<T> extends Collection<T> implements INotifyCol
 
 
     // Raises a PropertyChanged event (per <see cref="INotifyPropertyChanged" />). 
-    protected void OnPropertyChanged(PropertyChangeEvent e)
+    protected void onPropertyChanged(PropertyChangeEvent e)
     { 
         if (PropertyChanged != null)
         {
@@ -439,8 +439,6 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             InitializeAdd(action, changedItems, startingIndex);
         else if (action == NotifyCollectionChangedAction.Remove)
             InitializeRemove(action, changedItems, startingIndex); 
-        else
-            Contract.Assert(false, String.Format("Unsupported action: {0}", action.ToString())); 
     } 
 
     private void InitializeAdd(NotifyCollectionChangedAction action, List newItems, int newStartingIndex) 
@@ -495,30 +493,131 @@ public class NotifyCollectionChangedEvent // extends EventArgs
 
 } 
 
-public interface INotifyCollectionChanged {
-	public void addCollectionChangedListener();
-	public void removeCollectionChangedListener();
-}
-
-public function void CollectionChanged(NotifyCollectionChangedEvent event);
-
 public enum NotifyCollectionChangedAction{
 	Add,
 	Move,
 	Remove,
 	Replace,
-	Reset
+	Reset;
+}
+
+public interface INotifyCollectionChanged {
+	public void addCollectionChangedListener(CollectionChanged listener);
+	public void removeCollectionChangedListener(CollectionChanged listener);
+}
+
+public function void CollectionChanged(NotifyCollectionChangedEvent event);
+
+public class Config implements MarkupExtension{
+	private Class<ItemsControl> _itemControlClazz;
+	private ItemTemplate _template;
+	private String _path;   //property
+	
+	public Config(ItemTemplate template){
+		this(template, ItemsControl.class);
+	}
+	
+	public Config(ItemTemplate template, Class<ItemsControl> itemsControlClazz){
+		this._itemControlClazz = itemsControlClazz;
+		this._template = template;
+	}
+	
+	public native Object provideValue(Node target, String property, String targetProperty1) /*-{
+		var r = new (itemControl.factory)(target, this._path, this._template);
+		r.expand();
+		return r;
+	}-*/;
 }
 
 public class ItemsControl {
-	private Template itemTemplate;
+	private ItemTemplate itemTemplate;
 	private Node container;
-	public ItemsControl(Node container, Template itemTemplate){
+	private String path;
+	
+	private Object _dataItem;
+	protected java.lang.Map<Object, Node> nodesMap = new java.lang.Map<Object, Node>();
+	
+	public ItemsControl(Node container, String path, ItemTemplate itemTemplate){
 		this.itemTemplate = itemTemplate;
 		this.container = container;
+		this.path = path;
+		
+		container.dataContext.addItemsControl(this);
+		if(container.dataContext.dataItem == null){
+			this.dataItem = null;
+		} else {
+			this.dataItem = container.dataContext.dataItem[path];
+		}
+	}
+	
+	public Object dataItem{
+		&{
+			return this._dataItem;
+		}
+		+{
+			if(this._dataItem === value){
+				return;
+			}
+			if(this._dataItem != null){
+				if(this._dataItem instanceof ObservableCollection){
+					((ObservableCollection)this._dataItem).removeCollectionChangedListener(this.onCollectionChanged);
+				}
+			}
+
+			this._dataItem = value;
+			
+			if(this._dataItem != null){
+				if(this._dataItem instanceof ObservableCollection){
+					((ObservableCollection)this._dataItem).addCollectionChangedListener(this.onCollectionChanged);
+				}
+				
+				expand();
+			}
+		}
 	}
 	
 	public void expand(){
-		Object data = node.data
+		DataContext data = container.dataContext;
+		if(data.dataItem instanceof Collection){
+			for(Object obj : (Collection)data.dataItem){
+				Node node = itemTemplate.create(container, obj);
+				nodesMap.set(obj, node);
+				container.appendChild(node);
+			}
+		}
 	}
+	
+	public void invalidate(){
+		if(container.dataContext.dataItem == null){
+			this._dataItem = null;
+		} else {
+			this._dataItem = container.dataContext.dataItem[path];
+		}
+	}
+	
+	protected CollectionChanged onCollectionChanged = (NotifyCollectionChangedEvent event) ->{
+		switch(event.Action){
+		case Add:
+			List items = event.NewItems;
+			for(Object item : items){
+				Node root = itemTemplate.createRoot(container);
+				container.appendChild(root);
+				itemTemplate.createChild(root);
+			}
+		case Remove:
+			List items1 = event.NewItems;
+			for(Object item : items1){
+				Node child = nodesMap.get(item);
+				container.removeChild(child);
+			}
+
+		case Replace:
+		case Move:
+		case Reset:
+		}
+	};
+	
+	public PropertyChange propertyChange = (PropertyChangeEvent event)->{
+		this.dataItem = event.newValue;
+	};
 }

@@ -25,8 +25,6 @@
 
 package java.util;
 
-import java.util.functions.Consumer;
-
 /**
  * An iterator over a collection.  {@code Iterator} takes the place of
  * {@link Enumeration} in the Java Collections Framework.  Iterators
@@ -113,6 +111,6 @@ public interface Iterator<E> {
     default void forEachRemaining(Consumer<? super E> action) {
         Objects.requireNonNull(action);
         while (hasNext())
-            action.accept(next());
+            action(next());
     }
 }

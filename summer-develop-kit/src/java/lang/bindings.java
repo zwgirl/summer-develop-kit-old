@@ -1,6 +1,8 @@
 @java.lang.Module 
 package java.lang;
 
+import java.util.ItemsControl;
+
 import org.w3c.dom.Node;
 import org.w3c.event.Event;
 import org.w3c.event.EventListener;
@@ -217,6 +219,7 @@ public final class DataContext {
 	private String _property;
 	private BindingExpression[] _bindings;
 	private DataContext[] _dependents;
+	private ItemsControl[] _itemControls;
 	private Object _dataItem;
 	
 	@Overload("0")
@@ -225,16 +228,28 @@ public final class DataContext {
 //		this._property = null;
 		this._bindings = [];
 		this._dependents = [];
+		this._itemControls = [];
 		this._dataItem = __this; 
 	}-*/;
 	
-	@Overload("1")
+	@Overload("11")
 	public native DataContext(String property) /*-{
 		this._mode = __lc("java.lang.PathMode", "java.lang.bindings").Relative;
 		this._property = property;
 		this._bindings = [];
 		this._dependents = [];
+		this._itemControls = [];
 //		this._dataItem = __this; 
+	}-*/;
+	
+	@Overload("12")
+	public native DataContext(Object dataItem) /*-{
+		this._mode = __lc("java.lang.PathMode", "java.lang.bindings").Relative;
+		this._property = null;
+		this._bindings = [];
+		this._dependents = [];
+		this._itemControls = [];
+//		this._dataItem = dataItem; 
 	}-*/;
 	
 	@Overload("2")
@@ -247,6 +262,7 @@ public final class DataContext {
 		this._property = property;
 		_bindings = new Array<BindingExpression>();
 		_dependents = new Array<DataContext>();
+		_itemControls = new Array<ItemsControl>();
 	}
 	
 	public String property{
@@ -277,6 +293,26 @@ public final class DataContext {
 		_bindings.forEach((BindingExpression be, int index, Array<BindingExpression> array)->{
 			if(be == dependent){
 				_bindings.splice(index, 1);
+				return;
+			}
+		});
+		
+		//TODO remove from INotifyPropertyLiistener
+	}
+	
+	public void addItemsControl(ItemsControl ic){ 
+		_itemControls.push(ic);
+		if(this._dataItem instanceof INotifyPropertyChanged){
+			if(!ic.isDirectBinding){
+				((INotifyPropertyChanged) this._dataItem).addListener(ic.property, ic.propertyChange);
+			}
+		}
+	}
+	
+	public void removeItemsControl(ItemsControl dependent){
+		_itemControls.forEach((ItemsControl ic, int index, Array<ItemsControl> array)->{
+			if(ic == dependent){
+				_itemControls.splice(index, 1);
 				return;
 			}
 		});

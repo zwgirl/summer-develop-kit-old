@@ -8,5 +8,5 @@ public class FirstTemplate extends Template{
 		kshajshajksakjsha 
 		adadasasa
 		啊飒飒飒飒啊飒飒飒飒去啊飒飒飒飒 
-	</p>  
+	</p>   
 }
