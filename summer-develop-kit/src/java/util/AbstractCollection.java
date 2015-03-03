@@ -75,15 +75,13 @@ public abstract class AbstractCollection<E> implements Collection<E> {
      */
     public abstract Iterator<E> iterator();
 
-    public abstract int size();
-
     /**
      * {@inheritDoc}
      *
      * <p>This implementation returns <tt>size() == 0</tt>.
      */
     public boolean isEmpty() {
-        return size() == 0;
+        return size == 0;
     }
 
     /**
@@ -135,7 +133,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         // Estimate size of array; be prepared to see more or fewer elements
         Object[] r = new Array<Object>(); 
         Iterator<E> it = iterator();
-        int i = size();
+        int i = size;
         while (it.hasNext()) {  
             r[i++] = it.next();
         }

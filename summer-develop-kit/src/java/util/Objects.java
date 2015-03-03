@@ -25,8 +25,6 @@
 
 package java.util;
 
-import java.util.functions.Supplier;
-
 /**
  * This class consists of {@code static} utility methods for operating
  * on objects.  These utilities include {@code null}-safe or {@code
@@ -97,50 +95,6 @@ public final class Objects {
         return o != null ? o.hashCode() : 0;
     }
 
-   /**
-    * Generates a hash code for a sequence of input values. The hash
-    * code is generated as if all the input values were placed into an
-    * array, and that array were hashed by calling {@link
-    * Arrays#hashCode(Object[])}.
-    *
-    * <p>This method is useful for implementing {@link
-    * Object#hashCode()} on objects containing multiple fields. For
-    * example, if an object that has three fields, {@code x}, {@code
-    * y}, and {@code z}, one could write:
-    *
-    * <blockquote><pre>
-    * &#064;Override public int hashCode() {
-    *     return Objects.hash(x, y, z);
-    * }
-    * </pre></blockquote>
-    *
-    * <b>Warning: When a single object reference is supplied, the returned
-    * value does not equal the hash code of that object reference.</b> This
-    * value can be computed by calling {@link #hashCode(Object)}.
-    *
-    * @param values the values to be hashed
-    * @return a hash value of the sequence of input values
-    * @see Arrays#hashCode(Object[])
-    * @see List#hashCode
-    */
-    public static int hash(Object... values) {
-        return Arrays.hashCode(values);
-    }
-
-    /**
-     * Returns the result of calling {@code toString} for a non-{@code
-     * null} argument and {@code "null"} for a {@code null} argument.
-     *
-     * @param o an object
-     * @return the result of calling {@code toString} for a non-{@code
-     * null} argument and {@code "null"} for a {@code null} argument
-     * @see Object#toString
-     * @see String#valueOf(Object)
-     */
-    public static String toString(Object o) {
-        return String.valueOf(o);
-    }
-
     /**
      * Returns the result of calling {@code toString} on the first
      * argument if the first argument is not {@code null} and returns
@@ -156,30 +110,6 @@ public final class Objects {
      */
     public static String toString(Object o, String nullDefault) {
         return (o != null) ? o.toString() : nullDefault;
-    }
-
-    /**
-     * Returns 0 if the arguments are identical and {@code
-     * c.compare(a, b)} otherwise.
-     * Consequently, if both arguments are {@code null} 0
-     * is returned.
-     *
-     * <p>Note that if one of the arguments is {@code null}, a {@code
-     * NullPointerException} may or may not be thrown depending on
-     * what ordering policy, if any, the {@link Comparator Comparator}
-     * chooses to have for {@code null} values.
-     *
-     * @param <T> the type of the objects being compared
-     * @param a an object
-     * @param b an object to be compared with {@code a}
-     * @param c the {@code Comparator} to compare the first two arguments
-     * @return 0 if the arguments are identical and {@code
-     * c.compare(a, b)} otherwise.
-     * @see Comparable
-     * @see Comparator
-     */
-    public static int compare<T>(T a, T b, Comparator<? super T> c) {
-        return (a == b) ? 0 :  c.compare(a, b);
     }
 
     /**
@@ -262,31 +192,5 @@ public final class Objects {
      */
     public static boolean nonNull(Object obj) {
         return obj != null;
-    }
-
-    /**
-     * Checks that the specified object reference is not {@code null} and
-     * throws a customized {@link NullPointerException} if it is.
-     *
-     * <p>Unlike the method {@link #requireNonNull(Object, String)},
-     * this method allows creation of the message to be deferred until
-     * after the null check is made. While this may confer a
-     * performance advantage in the non-null case, when deciding to
-     * call this method care should be taken that the costs of
-     * creating the message supplier are less than the cost of just
-     * creating the string message directly.
-     *
-     * @param obj     the object reference to check for nullity
-     * @param messageSupplier supplier of the detail message to be
-     * used in the event that a {@code NullPointerException} is thrown
-     * @param <T> the type of the reference
-     * @return {@code obj} if not {@code null}
-     * @throws NullPointerException if {@code obj} is {@code null}
-     * @since 1.8
-     */
-    public static T requireNonNull<T>(T obj, Supplier<String> messageSupplier) {
-        if (obj == null)
-            throw new NullPointerException(messageSupplier.get());
-        return obj;
     }
 }

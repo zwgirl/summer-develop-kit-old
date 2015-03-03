@@ -106,7 +106,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      *         prevents it from being added to this list
      */
     public boolean add(E e) {
-        addAt(size(), e);
+        addAt(this.size, e);
         return true;
     }
     
@@ -200,7 +200,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      * @throws NullPointerException {@inheritDoc}
      */
     public int lastIndexOf(Object o) {
-        ListIterator<E> it = listIteratorAt(size());
+        ListIterator<E> it = listIteratorAt(size);
         if (o==null) {
             while (it.hasPrevious())
                 if (it.previous()==null)
@@ -231,7 +231,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
      *         is not supported by this list
      */
     public void clear() {
-        removeRange(0, size());
+        removeRange(0, size);
     }
 
     /**
@@ -348,11 +348,10 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         int expectedModCount = modCount;
 
         public boolean hasNext() {
-            return cursor != size();
+            return cursor != size;
         }
 
         public E next() {
-//            checkForComodification();
 //            try {
                 int i = cursor;
                 E next = get(i);
@@ -360,7 +359,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
                 cursor = i + 1;
                 return next;
 //            } catch (IndexOutOfBoundsException e) {
-//                checkForComodification();
 //                throw new NoSuchElementException();
 //            }
         }
@@ -368,7 +366,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         public void remove() {
             if (lastRet < 0)
                 throw new IllegalStateException();
-//            checkForComodification();
 
 //            try {
                 AbstractList.this.remove(lastRet);
@@ -397,7 +394,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         }
 
         public E previous() {
-//            checkForComodification();
             try {
                 int i = cursor - 1;
                 E previous = get(i);
@@ -420,8 +416,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         public void set(E e) {
             if (lastRet < 0)
                 throw new IllegalStateException();
-//            checkForComodification();
-
 //            try {
                 AbstractList.this.set(lastRet, e);
                 expectedModCount = modCount;
@@ -431,8 +425,6 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
         }
 
         public void add(E e) {
-//            checkForComodification();
-
 //            try {
                 int i = cursor;
                 AbstractList.this.addAt(i, e);
@@ -601,89 +593,84 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
     protected transient int modCount = 0;
 
     private void rangeCheckForAdd(int index) {
-        if (index < 0 || index > size())
+        if (index < 0 || index > size)
             throw new Error(0, "Index out of boundsException" + outOfBoundsMsg(index));
     }
 
     private String outOfBoundsMsg(int index) {
-        return "Index: "+index+", Size: "+size();
+        return "Index: "+index+", Size: "+size;
     }
 }
 
 class SubList<E> extends AbstractList<E> {
     private final AbstractList<E> l;
     private final int offset;
-    private int size;
+    private int _size;
 
     SubList(AbstractList<E> list, int fromIndex, int toIndex) {
         if (fromIndex < 0)
         	throw new Error(0, "from index out of boundsException! ");
-        if (toIndex > list.size())
+        if (toIndex > list.size)
         	throw new Error(0, "toIndex out of boundsException! ");
         if (fromIndex > toIndex)
             throw new IllegalArgumentException("fromIndex(" + fromIndex +
                                                ") > toIndex(" + toIndex + ")");
         l = list;
         offset = fromIndex;
-        size = toIndex - fromIndex;
+        _size = toIndex - fromIndex;
         this.modCount = l.modCount;
     }
 
     public E set(int index, E element) {
-//        rangeCheck(index);
-//        checkForComodification();
+        rangeCheck(index);
         return l.set(index+offset, element);
     }
 
     public E get(int index) {
-//        rangeCheck(index);
-//        checkForComodification();
+        rangeCheck(index);
         return l.get(index+offset);
     }
 
-    public int size() {
-//        checkForComodification();
-        return size;
+    public int size {
+        &{
+        	return _size;
+        }
     }
 
     public void addAt(int index, E element) {
-//        rangeCheckForAdd(index);
-//        checkForComodification();
+        rangeCheckForAdd(index);
         l.addAt(index+offset, element);
         this.modCount = l.modCount;
-        size++;
+        _size++;
     }
 
     public E removeAt(int index) {
-//        rangeCheck(index);
-//        checkForComodification();
+        rangeCheck(index);
         E result = l.removeAt(index+offset);
         this.modCount = l.modCount;
-        size--;
+        _size--;
         return result;
     }
 
     protected void removeRange(int fromIndex, int toIndex) {
-//        checkForComodification();
         l.removeRange(fromIndex+offset, toIndex+offset);
         this.modCount = l.modCount;
-        size -= (toIndex-fromIndex);
+        _size -= (toIndex-fromIndex);
     }
 
     public boolean addAll(Collection<? extends E> c) {
-        return addAll(size, c);
+        return addAll(_size, c);
     }
 
     public boolean addAllAt(int index, Collection<? extends E> c) {
-//        rangeCheckForAdd(index);
-        int cSize = c.size();
+        rangeCheckForAdd(index);
+        int cSize = c.size;
         if (cSize==0)
             return false;
 
-//        checkForComodification();
         l.addAll(offset+index, c);
         this.modCount = l.modCount;
-        size += cSize;
+        _size += cSize;
         return true;
     }
 
@@ -692,8 +679,7 @@ class SubList<E> extends AbstractList<E> {
     }
 
     public ListIterator<E> listIterator(final int index) {
-//        checkForComodification();
-//        rangeCheckForAdd(index);
+        rangeCheckForAdd(index);
 
         return new ListIterator<E>() {
             private final ListIterator<E> i = l.listIteratorAt(index+offset);
@@ -731,7 +717,7 @@ class SubList<E> extends AbstractList<E> {
             public void remove() {
                 i.remove();
                 SubList.this.modCount = l.modCount;
-                size--;
+                _size--;
             }
 
             public void set(E e) {
@@ -741,7 +727,7 @@ class SubList<E> extends AbstractList<E> {
             public void add(E e) {
                 i.add(e);
                 SubList.this.modCount = l.modCount;
-                size++;
+                _size++;
             }
         };
     }
@@ -750,24 +736,19 @@ class SubList<E> extends AbstractList<E> {
         return new SubList<>(this, fromIndex, toIndex);
     }
 
-//    private void rangeCheck(int index) {
-//        if (index < 0 || index >= size)
-//            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
-//    }
-//
-//    private void rangeCheckForAdd(int index) {
-//        if (index < 0 || index > size)
-//            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
-//    }
-//
-//    private String outOfBoundsMsg(int index) {
-//        return "Index: "+index+", Size: "+size;
-//    }
+    private void rangeCheck(int index) {
+        if (index < 0 || index >= size)
+        	throw new Error(0, "index out of bounds" + outOfBoundsMsg(index));
+    }
 
-//    private void checkForComodification() {
-//        if (this.modCount != l.modCount)
-//            throw new ConcurrentModificationException();
-//    }
+    private void rangeCheckForAdd(int index) {
+        if (index < 0 || index > size)
+            throw new Error(0, "index out of bounds" + outOfBoundsMsg(index));
+    }
+
+    private String outOfBoundsMsg(int index) {
+        return "Index: "+index+", Size: "+size;
+    }
 }
 
 class RandomAccessSubList<E> extends SubList<E> implements RandomAccess {

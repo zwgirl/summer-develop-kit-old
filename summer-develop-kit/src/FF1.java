@@ -1,4 +1,4 @@
-import org.w3c.html.*;
+import org.w3c.html.*; 
 import org.w3c.dom.*;
 import org.summer.ui.*;
 import org.w3c.event.Event;
@@ -11,7 +11,7 @@ public class FF1 implements INotifyPropertyChanged{
 		<head>  
 		<meta httpEquiv="Content-Type" content="text/html;charset=utf-8" />
 			<script > 
-				 
+				   
 			</script> 
 			
 			<style type="text/css">   
@@ -31,7 +31,7 @@ public class FF1 implements INotifyPropertyChanged{
 			<Text data = {Binding property="style" mode = "OneWay"} />
 		</p>
 		<table>
-		 <caption>  </caption>
+		 <caption>  </caption> 
 		 <thead x:name = "_tttt1">
 		   
 		 </thead>
@@ -42,11 +42,18 @@ public class FF1 implements INotifyPropertyChanged{
 		 	<tr template = "FirstTemplate">
 		 	
 		 	<td> <input id="2" value={Binding property="style" mode = "TwoWay" updateSourceTrigger="PropertyChanged"}  onkeydown = "returnNav" /> </td>  
-		 	<td> 
-			 	<select itemTemplate="SelectTemplate">
-			 		Test
+		 	<td > 
+			 	<select itemsConfig ={ItemsConfig path = "options" itemTemplate = "SelectTemplate"}>
+			 		Test 
 			 	</select>
 		 	</td> 
+		 	
+		 	<td> 
+			 	<div itemsConfig ={ItemsConfig path = "options" itemTemplate = "SelectTemplate1"}>
+			 		Test
+			 	</div>
+		 	</td> 
+	 	
 		 	</tr>
 		 	<tr dataContext = {DataPath mode="Relative" property = "person"} >
 		 	<td> <input id="3" value={Binding property="name" mode = "TwoWay" updateSourceTrigger="PropertyChanged"}  /> </td> 
@@ -71,8 +78,27 @@ public class FF1 implements INotifyPropertyChanged{
 	    
 	public FF1(){ 
 		String g = ("wqwqwq");  
-
-	}
+		int i1 =10;
+		this._options = new ArrayList<Person>();
+		for(int i=0;i<3;i++){ 
+			_options.add(new Person("Smith" + i, 98));
+		}
+		
+		Collection coll = new ArrayList();
+		for(Object o: coll) {
+			for(Object o1: coll)  
+				i1=g.length;
+		}  
+		
+		for(Object o: coll){  
+			 
+		}
+		
+		Array<String> os = new Array<String>();
+		for(String s : os){
+			int ll = s.length; 
+		}
+ 	}
 	   
 	private int index = 0;
 	
@@ -80,6 +106,13 @@ public class FF1 implements INotifyPropertyChanged{
 	public Person person{
 		&{
 			return this._person;
+		}
+	}
+	
+	private List<Person> _options;
+	public List<Person> options{
+		&{
+			return this._options;
 		}
 	}
 	

@@ -29,7 +29,7 @@ public class ObservableCollection<T> implements Collection<T> ,INotifyCollection
         // doesn't copy the list (contrary to the documentation) - it uses the
         // list directly as its storage.  So we do the copying here. 
         //
-        CopyFrom(list);
+        copyFrom(list);
     }
 
     // Initializes a new instance of the ObservableCollection class that contains 
@@ -44,10 +44,10 @@ public class ObservableCollection<T> implements Collection<T> ,INotifyCollection
         if (collection == null) 
             throw new Error(0, "collection may not be null!");
 
-        CopyFrom(collection);
+        copyFrom(collection);
     } 
 
-    private void CopyFrom(Iterable<T> collection) 
+    private void copyFrom(Iterable<T> collection) 
     { 
         List<T> items = Items;
         if (collection != null && items != null) 
@@ -63,9 +63,9 @@ public class ObservableCollection<T> implements Collection<T> ,INotifyCollection
     }
 
     // Move item at oldIndex to newIndex. 
-    public void Move(int oldIndex, int newIndex)
+    public void move(int oldIndex, int newIndex)
     { 
-        MoveItem(oldIndex, newIndex);
+        moveItem(oldIndex, newIndex);
     }
 
     /// PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
@@ -225,7 +225,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (action != NotifyCollectionChangedAction.Reset) 
             throw new Error(0, "Action must be NotifyCollectionChangedAction.Reset");
 
-        InitializeAdd(action, null, -1); 
+        initializeAdd(action, null, -1); 
     }
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a one-item change.
@@ -242,11 +242,11 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             if (changedItem != null)
                 throw new Error(0, "ResetAction requires null changedItems"); 
 
-            InitializeAdd(action, null, -1);
+            initializeAdd(action, null, -1);
         } 
         else
         {
-            InitializeAddOrRemove(action, new Object[]{changedItem}, -1);
+            initializeAddOrRemove(action, new Object[]{changedItem}, -1);
         } 
     }
 
@@ -267,11 +267,11 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             if (index != -1)
                 throw new Error(0, "ResetAction requires index minus 1"); 
 
-            InitializeAdd(action, null, -1);
+            initializeAdd(action, null, -1);
         } 
         else
         {
-            InitializeAddOrRemove(action, new Object[]{changedItem}, index);
+            initializeAddOrRemove(action, new Object[]{changedItem}, index);
         } 
     }
 
@@ -291,7 +291,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             if (changedItems != null)
                 throw new Error(0, "ResetAction requires null changedItems"); 
 
-            InitializeAdd(action, null, -1);
+            initializeAdd(action, null, -1);
         } 
         else 
         {
@@ -321,7 +321,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             if (startingIndex != -1)
                 throw new Error(0, "ResetAction requires index minus 1"); 
 
-            InitializeAdd(action, null, -1);
+            initializeAdd(action, null, -1);
         } 
         else
         {
@@ -330,7 +330,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
             if (startingIndex < -1)
                 throw new Error(0, "Index cannot be negative"); 
 
-            InitializeAddOrRemove(action, changedItems, startingIndex);
+            initializeAddOrRemove(action, changedItems, startingIndex);
         } 
     }
 
@@ -343,7 +343,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (action != NotifyCollectionChangedAction.Replace)
             throw new Error(0, "Action must be NotifyCollectionChangedAction.Replace");
 
-        InitializeMoveOrReplace(action, new Object[]{newItem}, new Object[]{oldItem}, -1, -1);
+        initializeMoveOrReplace(action, new Object[]{newItem}, new Object[]{oldItem}, -1, -1);
     } 
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a one-item Replace event. 
@@ -356,7 +356,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (action != NotifyCollectionChangedAction.Replace)
             throw new Error(0, "Action must be NotifyCollectionChangedAction.Replace"); 
 
-        InitializeMoveOrReplace(action, new Object[]{newItem}, new Object[]{oldItem}, index, index);
+        initializeMoveOrReplace(action, new Object[]{newItem}, new Object[]{oldItem}, index, index);
     }
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event. 
@@ -372,7 +372,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (oldItems == null)
             throw new Error(0, "oldItems may not be null!"); 
 
-        InitializeMoveOrReplace(action, newItems, oldItems, -1, -1);
+        initializeMoveOrReplace(action, newItems, oldItems, -1, -1);
     }
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event. 
@@ -389,7 +389,7 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (oldItems == null) 
             throw new Error(0, "oldItems may not be null!"); 
 
-        InitializeMoveOrReplace(action, newItems, oldItems, startingIndex, startingIndex);
+        initializeMoveOrReplace(action, newItems, oldItems, startingIndex, startingIndex);
     } 
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a one-item Move event. 
@@ -404,8 +404,8 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (index < 0)
         	throw new Error(0, "Index cannot be negative"); 
 
-        Object[] changedItems= new Object[] {changedItem};
-        InitializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
+        List changedItems= new ArrayList(changedItem);
+        initializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
     } 
 
     /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Move event. 
@@ -420,45 +420,45 @@ public class NotifyCollectionChangedEvent // extends EventArgs
         if (index < 0)
             throw new Error(0, "Index cannot be negative"); 
 
-        InitializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
+        initializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
     }
 
     /// Construct a NotifyCollectionChangedEventArgs with given fields (no validation). Used by WinRT marshaling. 
     public NotifyCollectionChangedEvent(NotifyCollectionChangedAction action, List newItems, List oldItems, int newIndex, int oldIndex)
     { 
         _action = action;
-        _newItems = (newItems == null) ? null : ArrayList.ReadOnly(newItems);
-        _oldItems = (oldItems == null) ? null : ArrayList.ReadOnly(oldItems);
+        _newItems = (newItems == null) ? null : newItems;
+        _oldItems = (oldItems == null) ? null : oldItems;
         _newStartingIndex = newIndex; 
         _oldStartingIndex = oldIndex;
     } 
 
-    private void InitializeAddOrRemove(NotifyCollectionChangedAction action, List changedItems, int startingIndex)
+    private void initializeAddOrRemove(NotifyCollectionChangedAction action, List changedItems, int startingIndex)
     { 
         if (action == NotifyCollectionChangedAction.Add)
-            InitializeAdd(action, changedItems, startingIndex);
+            initializeAdd(action, changedItems, startingIndex);
         else if (action == NotifyCollectionChangedAction.Remove)
-            InitializeRemove(action, changedItems, startingIndex); 
+            initializeRemove(action, changedItems, startingIndex); 
     } 
 
-    private void InitializeAdd(NotifyCollectionChangedAction action, List newItems, int newStartingIndex) 
+    private void initializeAdd(NotifyCollectionChangedAction action, List newItems, int newStartingIndex) 
     {
         _action = action;
-        _newItems = (newItems == null) ? null : ArrayList.ReadOnly(newItems);
+        _newItems = (newItems == null) ? null : newItems;
         _newStartingIndex = newStartingIndex; 
     }
 
-    private void InitializeRemove(NotifyCollectionChangedAction action, List oldItems, int oldStartingIndex) 
+    private void initializeRemove(NotifyCollectionChangedAction action, List oldItems, int oldStartingIndex) 
     {
         _action = action; 
-        _oldItems = (oldItems == null) ? null : ArrayList.ReadOnly(oldItems);
+        _oldItems = (oldItems == null) ? null : oldItems;
         _oldStartingIndex= oldStartingIndex;
     }
 
-    private void InitializeMoveOrReplace(NotifyCollectionChangedAction action, List newItems, List oldItems, int startingIndex, int oldStartingIndex)
+    private void initializeMoveOrReplace(NotifyCollectionChangedAction action, List newItems, List oldItems, int startingIndex, int oldStartingIndex)
     { 
-        InitializeAdd(action, newItems, startingIndex); 
-        InitializeRemove(action, oldItems, oldStartingIndex);
+        initializeAdd(action, newItems, startingIndex); 
+        initializeRemove(action, oldItems, oldStartingIndex);
     } 
 
     /// The action that caused the event. 
@@ -493,131 +493,5 @@ public class NotifyCollectionChangedEvent // extends EventArgs
 
 } 
 
-public enum NotifyCollectionChangedAction{
-	Add,
-	Move,
-	Remove,
-	Replace,
-	Reset;
-}
 
-public interface INotifyCollectionChanged {
-	public void addCollectionChangedListener(CollectionChanged listener);
-	public void removeCollectionChangedListener(CollectionChanged listener);
-}
 
-public function void CollectionChanged(NotifyCollectionChangedEvent event);
-
-public class Config implements MarkupExtension{
-	private Class<ItemsControl> _itemControlClazz;
-	private ItemTemplate _template;
-	private String _path;   //property
-	
-	public Config(ItemTemplate template){
-		this(template, ItemsControl.class);
-	}
-	
-	public Config(ItemTemplate template, Class<ItemsControl> itemsControlClazz){
-		this._itemControlClazz = itemsControlClazz;
-		this._template = template;
-	}
-	
-	public native Object provideValue(Node target, String property, String targetProperty1) /*-{
-		var r = new (itemControl.factory)(target, this._path, this._template);
-		r.expand();
-		return r;
-	}-*/;
-}
-
-public class ItemsControl {
-	private ItemTemplate itemTemplate;
-	private Node container;
-	private String path;
-	
-	private Object _dataItem;
-	protected java.lang.Map<Object, Node> nodesMap = new java.lang.Map<Object, Node>();
-	
-	public ItemsControl(Node container, String path, ItemTemplate itemTemplate){
-		this.itemTemplate = itemTemplate;
-		this.container = container;
-		this.path = path;
-		
-		container.dataContext.addItemsControl(this);
-		if(container.dataContext.dataItem == null){
-			this.dataItem = null;
-		} else {
-			this.dataItem = container.dataContext.dataItem[path];
-		}
-	}
-	
-	public Object dataItem{
-		&{
-			return this._dataItem;
-		}
-		+{
-			if(this._dataItem === value){
-				return;
-			}
-			if(this._dataItem != null){
-				if(this._dataItem instanceof ObservableCollection){
-					((ObservableCollection)this._dataItem).removeCollectionChangedListener(this.onCollectionChanged);
-				}
-			}
-
-			this._dataItem = value;
-			
-			if(this._dataItem != null){
-				if(this._dataItem instanceof ObservableCollection){
-					((ObservableCollection)this._dataItem).addCollectionChangedListener(this.onCollectionChanged);
-				}
-				
-				expand();
-			}
-		}
-	}
-	
-	public void expand(){
-		DataContext data = container.dataContext;
-		if(data.dataItem instanceof Collection){
-			for(Object obj : (Collection)data.dataItem){
-				Node node = itemTemplate.create(container, obj);
-				nodesMap.set(obj, node);
-				container.appendChild(node);
-			}
-		}
-	}
-	
-	public void invalidate(){
-		if(container.dataContext.dataItem == null){
-			this._dataItem = null;
-		} else {
-			this._dataItem = container.dataContext.dataItem[path];
-		}
-	}
-	
-	protected CollectionChanged onCollectionChanged = (NotifyCollectionChangedEvent event) ->{
-		switch(event.Action){
-		case Add:
-			List items = event.NewItems;
-			for(Object item : items){
-				Node root = itemTemplate.createRoot(container);
-				container.appendChild(root);
-				itemTemplate.createChild(root);
-			}
-		case Remove:
-			List items1 = event.NewItems;
-			for(Object item : items1){
-				Node child = nodesMap.get(item);
-				container.removeChild(child);
-			}
-
-		case Replace:
-		case Move:
-		case Reset:
-		}
-	};
-	
-	public PropertyChange propertyChange = (PropertyChangeEvent event)->{
-		this.dataItem = event.newValue;
-	};
-}

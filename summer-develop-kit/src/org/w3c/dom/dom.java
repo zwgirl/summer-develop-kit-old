@@ -148,12 +148,12 @@ public native interface Node {
     	}
     }
     
-    public Template itemTemplate{
+    public ItemsConfig itemsConfig{
     	&{
-    		return this["__itemTemplate"] == undefined ? null : (Template)this["__itemTemplate"];
+    		return this["__itemsConfig"] == undefined ? null : (ItemsConfig)this["__itemsConfig"];
     	}
     	+{
-    		this["__itemTemplate"] = value; 
+    		this["__itemsConfig"] = value; 
     	}
     }
     

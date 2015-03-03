@@ -1,7 +1,9 @@
 @java.lang.Module 
 package java.lang;
 
-import java.util.ItemsControl;
+import java.util.Collection;
+import java.util.List;
+import java.util.NotifyCollectionChangedEvent;
 
 import org.w3c.dom.Node;
 import org.w3c.event.Event;
@@ -244,12 +246,12 @@ public final class DataContext {
 	
 	@Overload("12")
 	public native DataContext(Object dataItem) /*-{
-		this._mode = __lc("java.lang.PathMode", "java.lang.bindings").Relative;
+		this._mode = __lc("java.lang.PathMode", "java.lang.bindings").Absolute;
 		this._property = null;
 		this._bindings = [];
 		this._dependents = [];
 		this._itemControls = [];
-//		this._dataItem = dataItem; 
+		this._dataItem = dataItem; 
 	}-*/;
 	
 	@Overload("2")
@@ -303,9 +305,9 @@ public final class DataContext {
 	public void addItemsControl(ItemsControl ic){ 
 		_itemControls.push(ic);
 		if(this._dataItem instanceof INotifyPropertyChanged){
-			if(!ic.isDirectBinding){
-				((INotifyPropertyChanged) this._dataItem).addListener(ic.property, ic.propertyChange);
-			}
+//			if(!ic.isDirectBinding){
+				((INotifyPropertyChanged) this._dataItem).addListener(ic.path, ic.propertyChange);
+//			}
 		}
 	}
 	
@@ -438,4 +440,169 @@ public class DataPath implements MarkupExtension {
 	} -*/;
 }
 
+public function void CollectionChanged(NotifyCollectionChangedEvent event);
 
+public class ItemsConfig implements MarkupExtension{
+	private Class<ItemsControl> _itemControlClazz;
+	private ItemTemplate _template;
+	private String _path;   //property
+	
+	public ItemsConfig(Object option){
+		if(option["clazz"] != null){
+			this._itemControlClazz = (Class<ItemsControl>) option["clazz"];
+		} else {
+			this._itemControlClazz =ItemsControl.class;
+		}
+		
+		if(option["itemTemplate"] != null){
+			this._template = (ItemTemplate) option["itemTemplate"];
+		}
+		if(option["path"] != null){
+			this._path = (String) option["path"];
+		} 
+	} 
+	
+	public Class<ItemsControl> clazz{
+		&{
+			return this._itemControlClazz;
+		}
+		+{
+			this._itemControlClazz = value;
+		}
+	}
+	
+	public ItemTemplate itemTemplate{
+		&{
+			return this._template;
+		}
+		+{
+			this._template = value;
+		}
+	}
+	
+	public String path{
+		&{
+			return this._path;
+		}
+		+{
+			this._path = value;
+		}
+	}
+	
+	public native Object provideValue(Node target, String property, String targetProperty1) /*-{
+		var r = new (this._itemControlClazz.factory)(target, this._path, this._template);
+		r.expand();
+		return r;
+	}-*/;
+}
+
+public class ItemsControl {
+	private ItemTemplate itemTemplate;
+	private Node container;
+	private String _path;
+	
+	private Object _dataItem;
+	protected java.lang.Map<Object, Node> nodesMap = new java.lang.Map<Object, Node>();
+	
+	public ItemsControl(Node container, String path, ItemTemplate itemTemplate){
+		this.itemTemplate = itemTemplate;
+		this.container = container;
+		this._path = path;
+		
+		container.dataContext.addItemsControl(this);
+		if(container.dataContext.dataItem == null){
+			this.dataItem = null;
+		} else {
+			this.dataItem = container.dataContext.dataItem[path];
+		}
+	}
+	
+	public String path{
+		&{
+			return this._path;
+		}
+	}
+	
+	public Object dataItem{
+		&{
+			return this._dataItem;
+		}
+		+{
+			if(this._dataItem === value){
+				return;
+			}
+			if(this._dataItem != null){
+				if(this._dataItem instanceof INotifyCollectionChanged){
+					((INotifyCollectionChanged)this._dataItem).removeCollectionChangedListener(this.onCollectionChanged);
+				}
+			}
+
+			this._dataItem = value;
+			
+			if(this._dataItem != null){
+				if(this._dataItem instanceof INotifyCollectionChanged){
+					((INotifyCollectionChanged)this._dataItem).addCollectionChangedListener(this.onCollectionChanged);
+				}
+				
+				expand();
+			}
+		}
+	}
+	
+	public void expand(){
+		if(this._dataItem instanceof Collection){
+			for(Object obj : (Collection<?>)this._dataItem){
+				Node node = itemTemplate.create(container, obj);
+				nodesMap.set(obj, node);
+				container.appendChild(node);
+			}
+		}
+	}
+	
+	public void invalidate(){
+		if(container.dataContext.dataItem == null){
+			this._dataItem = null;
+		} else {
+			this._dataItem = container.dataContext.dataItem[_path];
+		}
+	}
+	
+	protected CollectionChanged onCollectionChanged = (NotifyCollectionChangedEvent event) ->{
+		switch(event.Action){
+		case Add:
+			List<?> items = event.NewItems;
+			for(Object item : items){
+				Node root = itemTemplate.createRoot(container);
+				container.appendChild(root);
+				itemTemplate.createChild(root);
+			}
+		case Remove:
+			List<?> items1 = event.NewItems;
+			for(Object item : items1){
+				Node child = nodesMap.get(item);
+				container.removeChild(child);
+			}
+
+		case Replace:
+		case Move:
+		case Reset:
+		}
+	};
+	
+	public PropertyChange propertyChange = (PropertyChangeEvent event)->{
+		this.dataItem = event.newValue;
+	};
+}
+
+public enum NotifyCollectionChangedAction{
+	Add,
+	Move,
+	Remove,
+	Replace,
+	Reset;
+}
+
+public interface INotifyCollectionChanged {
+	public void addCollectionChangedListener(CollectionChanged listener);
+	public void removeCollectionChangedListener(CollectionChanged listener);
+}
